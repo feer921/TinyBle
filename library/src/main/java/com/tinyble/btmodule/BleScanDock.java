@@ -39,6 +39,9 @@ public class BleScanDock {
     protected static final int MSG_WHAT_SCANED_BLE_DEV = 1;
     private static final int MSG_WHAT_DELAY_TO_STOP_SCAN = 2;
 
+    protected int curScanState = SCAN_STATE_OVER;
+    protected final static int SCAN_STATE_ING = 1;
+    protected final static int SCAN_STATE_OVER = 2;
 
     public BleScanDock(BluetoothAdapter bluetoothAdapter, IBtActions iBtActions, UUID[] scanFilterUuids) {
         this.bluetoothAdapter = bluetoothAdapter;
@@ -87,6 +90,10 @@ public class BleScanDock {
         }
     };
     public boolean startBleScan(){
+        if (curScanState == SCAN_STATE_ING) {
+            return true;
+        }
+        curScanState = SCAN_STATE_ING;
         boolean startScanSuc = false;
         if (isNeedClassicScan) {
             startScanSuc = bluetoothAdapter.startDiscovery();
@@ -95,6 +102,7 @@ public class BleScanDock {
         return startScanSuc;
     }
     public void stopBleScan(){
+        curScanState = SCAN_STATE_OVER;
         if (isNeedClassicScan) {
             bluetoothAdapter.cancelDiscovery();
         }

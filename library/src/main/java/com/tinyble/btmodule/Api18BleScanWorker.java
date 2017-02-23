@@ -22,6 +22,10 @@ public class Api18BleScanWorker extends BleScanDock implements BluetoothAdapter.
 
     @Override
     public boolean startBleScan() {
+        if (curScanState == SCAN_STATE_ING) {
+            return true;
+        }
+        curScanState = SCAN_STATE_ING;
         //注：BLE的开始扫描 的开始、结束状态并不会通过广播接收者那接收到
         if (null != iBtActions) {
             iBtActions.scanWorkState(IBtActions.SCAN_WORK_ING);
@@ -33,6 +37,7 @@ public class Api18BleScanWorker extends BleScanDock implements BluetoothAdapter.
 
     @Override
     public void stopBleScan() {
+        curScanState = SCAN_STATE_OVER;
         mHandler.removeCallbacksAndMessages(null);
         bluetoothAdapter.stopLeScan(this);
         if (null != iBtActions) {
