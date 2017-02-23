@@ -47,8 +47,11 @@ public class BtInfosReceiver extends BroadcastReceiver {
         else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
             //扫描到了一个蓝牙设备
             BluetoothDevice theScanedOne = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            int rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, (short) 0);
+            ExtendedBluetoothDev wrapperBTdev = new ExtendedBluetoothDev(theScanedOne);
+            wrapperBTdev.setRssi(rssi);
             if (btActions != null) {
-                btActions.scanedABtDev(theScanedOne, intent);
+                btActions.scanedABtDev(wrapperBTdev);
             }
         }
         //该广播一般可以不用理会，直接在蓝牙端对端连接时的逻辑里回调出来
@@ -85,4 +88,5 @@ public class BtInfosReceiver extends BroadcastReceiver {
                 .appendBtActions(BluetoothDevice.ACTION_FOUND)
                 .appendBtActions(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
     }
+
 }

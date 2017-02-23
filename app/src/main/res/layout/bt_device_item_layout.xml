@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#8ee"
+    >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_dev_name"
+        android:text="BT3.0A"
+        android:textColor="#000"
+
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="bt-dev-mac-address"
+        android:id="@+id/tv_dev_mac"
+        android:textColor="#000"
+        android:layout_marginTop="3dp"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="是否绑定:是"
+        android:id="@+id/tv_dev_mathch_state"
+        android:textColor="#000"
+        android:layout_marginTop="3dp"
+        />
+
+</LinearLayout>

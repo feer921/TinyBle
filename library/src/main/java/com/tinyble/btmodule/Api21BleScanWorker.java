@@ -4,10 +4,12 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.os.Message;
 import android.os.ParcelUuid;
+
+import com.tinyble.btmodule.utils.CommonLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +31,15 @@ public class Api21BleScanWorker extends BleScanDock {
 
     @Override
     public boolean startBleScan() {
+        if (null != iBtActions) {
+            iBtActions.scanWorkState(IBtActions.SCAN_WORK_ING);
+        }
+        CommonLog.i(TAG,"-->startBleScan()...bluetoothAdapter.getBluetoothLeScanner()  ." + bluetoothAdapter.getBluetoothLeScanner());
 //        手动关闭蓝牙模块，则得出为null
         if (bluetoothAdapter.getBluetoothLeScanner() != null) {
             bluetoothAdapter.getBluetoothLeScanner().startScan(buildScanFilterBaseUuid(), new ScanSettings.Builder().build(), bleScanCallback4Api21);
         }
+        CommonLog.i(TAG,"-->startBleScan().to send delay stop scan..");
         delay2StopBleScan();
         return true;
     }
@@ -50,9 +57,13 @@ public class Api21BleScanWorker extends BleScanDock {
     }
     @Override
     public void stopBleScan() {
+        CommonLog.i(TAG, "-->stopBleScan()...");
         mHandler.removeCallbacksAndMessages(null);
         if (bluetoothAdapter.getBluetoothLeScanner() != null) {
             bluetoothAdapter.getBluetoothLeScanner().stopScan(bleScanCallback4Api21);
+        }
+        if (null != iBtActions) {
+            iBtActions.scanWorkState(IBtActions.SCAN_WORK_OVER);
         }
     }
 
@@ -68,10 +79,19 @@ public class Api21BleScanWorker extends BleScanDock {
          */
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            Message msg = new Message();
-            msg.what = MSG_WHAT_SCANED_BLE_DEV;
-            // TODO: 2017/2/22
-
+            CommonLog.i(TAG, "-->onScanResult() callbackType = " + callbackType + " result = " + result);
+//            Message msg = new Message();
+//            msg.what = MSG_WHAT_SCANED_BLE_DEV;
+//            ExtendedBluetoothDev scanedDev = new ExtendedBluetoothDev(result.getDevice());
+//            msg.obj = scanedDev;
+//            mHandler.sendMessage(msg);
+            ExtendedBluetoothDev wrappedBtDev = new ExtendedBluetoothDev(result.getDevice());
+            wrappedBtDev.setRssi(result.getRssi());
+            ScanRecord srecord = result.getScanRecord();
+            wrappedBtDev.setDevName(srecord.getDeviceName());
+            if (null != iBtActions) {
+                iBtActions.scanedABtDev(wrappedBtDev);
+            }
         }
 
         /**
@@ -80,6 +100,7 @@ public class Api21BleScanWorker extends BleScanDock {
          */
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
+            CommonLog.i(TAG, "-->onBatchScanResults() results = " + results);
         }
 
         /**
@@ -89,6 +110,7 @@ public class Api21BleScanWorker extends BleScanDock {
          */
         @Override
         public void onScanFailed(int errorCode) {
+            CommonLog.e(TAG, "--> onScanFailed() errorCode = " + errorCode);
         }
     }
 }

@@ -113,6 +113,10 @@ public class TinyBle {
      * @return true:启动成功；false:启动失败
      */
     public boolean startScanCommonBt() {
+        switchBtModule(true);
+        if (curScanMode == SCAN_MODE_BLE) {
+            stopBleScan();
+        }
         curScanMode = SCAN_MODE_CLASSIC;
         if (null != bluetoothAdapter) {
             if (bluetoothAdapter.isDiscovering()) {
@@ -177,6 +181,10 @@ public class TinyBle {
      * @return true:操作成功；false:操作失败
      */
     public boolean startBleScan(UUID[] scanFiltersUuids) {
+        switchBtModule(true);
+        if (curScanMode == SCAN_MODE_CLASSIC) {
+            stopCommonScan();
+        }
         curScanMode = SCAN_MODE_BLE;
         checkBleScanDockNotNull();
         bleScanDock.configScanFiltersUuids(scanFiltersUuids);

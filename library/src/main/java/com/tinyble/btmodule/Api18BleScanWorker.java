@@ -22,6 +22,10 @@ public class Api18BleScanWorker extends BleScanDock implements BluetoothAdapter.
 
     @Override
     public boolean startBleScan() {
+        //注：BLE的开始扫描 的开始、结束状态并不会通过广播接收者那接收到
+        if (null != iBtActions) {
+            iBtActions.scanWorkState(IBtActions.SCAN_WORK_ING);
+        }
         boolean optSuc = bluetoothAdapter.startLeScan(scanFilterUuids,this);
         delay2StopBleScan();
         return optSuc;
@@ -31,6 +35,9 @@ public class Api18BleScanWorker extends BleScanDock implements BluetoothAdapter.
     public void stopBleScan() {
         mHandler.removeCallbacksAndMessages(null);
         bluetoothAdapter.stopLeScan(this);
+        if (null != iBtActions) {
+            iBtActions.scanWorkState(IBtActions.SCAN_WORK_OVER);
+        }
     }
     /**
      * Callback reporting an LE device found during a device scan initiated
@@ -43,9 +50,11 @@ public class Api18BleScanWorker extends BleScanDock implements BluetoothAdapter.
      */
     @Override
     public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+        ExtendedBluetoothDev curScanedOne = new ExtendedBluetoothDev(device);
+        curScanedOne.setRssi(rssi);
+        curScanedOne.setScanRecord(scanRecord);
         Message msg = new Message();
-        msg.obj = device;
-        msg.arg1 = rssi;
+        msg.obj = curScanedOne;
         msg.what = MSG_WHAT_SCANED_BLE_DEV;
         mHandler.sendMessage(msg);
     }

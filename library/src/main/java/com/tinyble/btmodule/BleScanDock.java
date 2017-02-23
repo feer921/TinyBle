@@ -17,6 +17,7 @@ import java.util.UUID;
  * 注：兼容了BT3.0的扫描
  */
 public class BleScanDock {
+    protected final String TAG = getClass().getSimpleName();
     protected BluetoothAdapter bluetoothAdapter;
     protected IBtActions iBtActions;
     /**
@@ -24,9 +25,9 @@ public class BleScanDock {
      */
     protected UUID[] scanFilterUuids;
     /**
-     * 默认推迟6秒钟自动停止BLE扫描
+     * 默认推迟10秒钟自动停止BLE扫描
      */
-    protected int durationOfScan = 6000;
+    protected int durationOfScan = 10000;
     /**
      * 是否需要经典的扫描操作,本类使用
      */
@@ -74,8 +75,10 @@ public class BleScanDock {
             int msgWhat = msg.what;
             switch (msgWhat) {
                 case MSG_WHAT_SCANED_BLE_DEV:
-                    // TODO: 2017/2/22
-
+                    ExtendedBluetoothDev scanedDev = (ExtendedBluetoothDev) msg.obj;
+                    if (iBtActions != null) {
+                        iBtActions.scanedABtDev(scanedDev);
+                    }
                     break;
                 case MSG_WHAT_DELAY_TO_STOP_SCAN:
                     stopBleScan();

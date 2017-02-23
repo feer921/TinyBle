@@ -1,7 +1,6 @@
 package com.tinyble.btmodule;
 
 import android.bluetooth.BluetoothDevice;
-import android.content.Intent;
 
 /**
  * User: fee(1176610771@qq.com)
@@ -57,10 +56,9 @@ public interface IBtActions {
 
     /**
      * 扫描到了一个设备
-     * @param scanedOne 扫描到的设备，因系统原因，可能会扫描到重复设备，需要使用都自己去重复
-     * @param extraIntent 附加于所扫描到的蓝牙设备的信息，包括RSSi/NAME等
+     * @param scanedOne 扫描到的设备，因系统原因，可能会扫描到重复设备，需要使用者自己去重复
      */
-    void scanedABtDev(BluetoothDevice scanedOne, Intent extraIntent);
+    void scanedABtDev(ExtendedBluetoothDev scanedOne);
 
     /**
      * 蓝牙扫描工作的状态
