@@ -31,6 +31,10 @@ public class Api21BleScanWorker extends BleScanDock {
 
     @Override
     public boolean startBleScan() {
+        if (curScanState == SCAN_STATE_ING) {
+            return true;
+        }
+        curScanState = SCAN_STATE_ING;
         if (null != iBtActions) {
             iBtActions.scanWorkState(IBtActions.SCAN_WORK_ING);
         }
@@ -57,6 +61,7 @@ public class Api21BleScanWorker extends BleScanDock {
     }
     @Override
     public void stopBleScan() {
+        curScanState = SCAN_STATE_OVER;
         CommonLog.i(TAG, "-->stopBleScan()...");
         mHandler.removeCallbacksAndMessages(null);
         if (bluetoothAdapter.getBluetoothLeScanner() != null) {
@@ -79,7 +84,7 @@ public class Api21BleScanWorker extends BleScanDock {
          */
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            CommonLog.i(TAG, "-->onScanResult() callbackType = " + callbackType + " result = " + result);
+            CommonLog.i(TAG, "-->onScanResult() callbackType = " + callbackType + " result = " + result.getDevice());
 //            Message msg = new Message();
 //            msg.what = MSG_WHAT_SCANED_BLE_DEV;
 //            ExtendedBluetoothDev scanedDev = new ExtendedBluetoothDev(result.getDevice());
