@@ -5,11 +5,13 @@ import android.annotation.SuppressLint;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.tinyble.btmodule.ExtendedBluetoothDev;
 import com.tinyble.btmodule.IBtActions;
@@ -38,6 +40,7 @@ public class BtDevChooseActivity extends ListActivity implements IBtActions,View
         super.onCreate(savedInstanceState);
         setContentView(R.layout.scan_ble_layout);
         CommonLog.logEnable(true);
+        CommonLog.i("BtDevChooseActivity","BtDevChooseActivity --> onCreate()");
         tinyBle = TinyBle.getMe();
         tinyBle.configBtActionsListener(this);
         setListAdapter(btDeviceAdapter = new BTDeviceAdapter(this, null));
@@ -52,17 +55,18 @@ public class BtDevChooseActivity extends ListActivity implements IBtActions,View
         tinyBle.registerBtActionReceiver(this);
         if (!tinyBle.isBtModuleEnabled()) {
             tvBtState.setText("蓝牙模块未开启");
-            if (!tinyBle.switchBtModule(true)) {
+            if (!tinyBle.switchBtModule(true)) {//代码尝试去打开蓝牙模块，会有引起界面skip frames(丢帧现象)
                 tinyBle.action2EnableBT(this, 100);
             }
         }
         else{
             tvBtState.setText("蓝牙模已开启");
         }
-        if (!TinyPermissin.isPermissionGranted(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
-            findViewById(R.id.btn_ble_scan).setEnabled(false);
+        if (!TinyPermissin.isPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
             tvOtherState.setText("未获取定位权限");
-            TinyPermissin.requestAPermission(this, REQUEST_ACCESS_LOCATION_PERMISSION_CODE, Manifest.permission.ACCESS_COARSE_LOCATION);
+            TinyPermissin.requestAPermission(this, REQUEST_ACCESS_LOCATION_PERMISSION_CODE, Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            );
         }
         else{
             tvOtherState.setText("已获取定位权限");
@@ -165,6 +169,7 @@ public class BtDevChooseActivity extends ListActivity implements IBtActions,View
         pbScan.setVisibility(toStart ? View.VISIBLE : View.INVISIBLE);
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void onClick(View v) {
         int viewId = v.getId();
@@ -177,6 +182,19 @@ public class BtDevChooseActivity extends ListActivity implements IBtActions,View
                 break;
             case R.id.btn_ble_scan:
                 btDeviceAdapter.clearData();
+                String accessFinePer = Manifest.permission.ACCESS_FINE_LOCATION;
+                boolean theFineLocationPermission = TinyPermissin.isPermissionGranted(this, accessFinePer, true, REQUEST_ACCESS_LOCATION_PERMISSION_CODE);
+//                if (TinyUtil.isApiCompatible(23)) {
+//                    int checkSelfPer = checkSelfPermission(accessFinePer);//0
+//                    int checkCallOrSelfPer = checkCallingOrSelfPermission(accessFinePer);//0
+//                    int checkCallPer = checkCallingPermission(accessFinePer);//-1
+//                    CommonLog.e("info", "--> XXX  checkSelfPer= " + checkSelfPer + " checkCallOrSelfPer= " + checkCallOrSelfPer + " checkCallPer =  " + checkCallPer);
+//                }
+                CommonLog.e("info", "))))))))))00000  theFineLocationPermission  " + theFineLocationPermission);
+                if (!theFineLocationPermission) {
+                    Toast.makeText(this, "定位权限被未被允许，不能进行BLE扫描", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 tinyBle.startBleScan();
                 break;
         }
@@ -186,13 +204,56 @@ public class BtDevChooseActivity extends ListActivity implements IBtActions,View
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         CommonLog.e("info", "-->onRequestPermissionsResult() requestCode = " + requestCode + " permissions[0] = " + permissions[0]
-         +" grantResults[0]=" + grantResults[0]
+         +"  grantResults[0]=" + grantResults[0]
         );
+        for (String per : permissions) {
+            CommonLog.i("info", "--> onRequestPermissionsResult() back permission : " + per);
+        }
         if (requestCode == REQUEST_ACCESS_LOCATION_PERMISSION_CODE) {
             if (TinyPermissin.isThePermissionGrantedInResults(Manifest.permission.ACCESS_COARSE_LOCATION, permissions, grantResults)) {
-                findViewById(R.id.btn_ble_scan).setEnabled(true);
                 tvOtherState.setText("已获取定位权限");
             }
         }
     }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        CommonLog.i("BtDevChooseActivity"," --> onStart()");
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        CommonLog.i("BtDevChooseActivity"," --> onResume()");
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        CommonLog.i("BtDevChooseActivity"," --> onPause()");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        CommonLog.i("BtDevChooseActivity"," --> onStop()");
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        CommonLog.i("BtDevChooseActivity"," --> onConfigurationChanged()  newConfig = " + newConfig);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        CommonLog.i("BtDevChooseActivity"," --> onSaveInstanceState()");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        CommonLog.i("BtDevChooseActivity"," --> onRestart()");
+    }
+
+
 }
